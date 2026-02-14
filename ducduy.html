@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAGON LOCK</title>
+
+<style>
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+background:#f2f2f7;
+}
+
+/* HEADER */
+.header{
+position:fixed;
+top:0;
+width:100%;
+height:60px;
+background:#0a84ff;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:600;
+font-size:18px;
+z-index:10;
+}
+
+/* CONTENT */
+.content{
+margin-top:70px;
+padding:15px;
+}
+
+/* LOGIN BOX */
+.login-box{
+background:white;
+padding:20px;
+border-radius:16px;
+box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+
+input{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid #ddd;
+margin-top:10px;
+font-size:14px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+margin-top:12px;
+background:#0a84ff;
+color:white;
+font-weight:600;
+font-size:15px;
+cursor:pointer;
+}
+
+.notice{
+margin-top:10px;
+font-size:14px;
+}
+
+/* SOCIAL */
+.social{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.social button{
+flex:1;
+border-radius:12px;
+font-weight:600;
+}
+
+.fb{background:#1877f2;color:white;}
+.zalo{background:#0068ff;color:white;}
+
+/* CARD */
+.card{
+background:white;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.05);
+}
+
+.item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px;
+border-bottom:1px solid #eee;
+font-size:15px;
+}
+
+.item:last-child{border-bottom:none;}
+
+/* IOS SWITCH */
+.switch{
+position:relative;
+width:50px;
+height:28px;
+}
+
+.switch input{
+opacity:0;
+width:0;
+height:0;
+}
+
+.slider{
+position:absolute;
+top:0;left:0;right:0;bottom:0;
+background:#ccc;
+transition:.4s;
+border-radius:34px;
+}
+
+.slider:before{
+position:absolute;
+content:"";
+height:22px;width:22px;
+left:3px;bottom:3px;
+background:white;
+transition:.4s;
+border-radius:50%;
+}
+
+input:checked + .slider{
+background-color:#34c759;
+}
+
+input:checked + .slider:before{
+transform:translateX(22px);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">DRAGON LOCK</div>
+
+<div class="content">
+
+<!-- LOGIN -->
+<div class="login-box" id="loginBox">
+<div><b>Device ID:</b> <span id="deviceID"></span></div>
+<input type="text" id="keyInput" placeholder="Nhập Key">
+<button onclick="checkKey()">ĐĂNG NHẬP</button>
+<div class="notice" id="notice"></div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+
+<div class="social">
+<button class="fb" onclick="openFB()">Facebook</button>
+<button class="zalo" onclick="openZalo()">Zalo</button>
+</div>
+
+<div class="card">
+
+<div class="item">Tối Ưu UI
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Neon Boost
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Chế Độ Ultra
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Hiệu Ứng 3D
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Hệ Thống Thông Minh
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Chế Độ Mượt
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Tăng Tốc Render
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Giao Diện Pro
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Hiệu Ứng Ánh Sáng
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+<div class="item">Chế Độ Bảo Vệ
+<label class="switch"><input type="checkbox"><span class="slider"></span></label>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* SECRET */
+const SECRET="DRAGON_SECRET_2026";
+
+/* DEVICE ID */
+function getDeviceID(){
+let id=localStorage.getItem("dragon_device_id");
+if(!id){
+id="DEV"+Math.random().toString(36).substring(2,8).toUpperCase();
+localStorage.setItem("dragon_device_id",id);
+}
+return id;
+}
+
+document.getElementById("deviceID").innerText=getDeviceID();
+
+/* SHA256 */
+async function sha256(str){
+const buf=new TextEncoder().encode(str);
+const hash=await crypto.subtle.digest("SHA-256",buf);
+return Array.from(new Uint8Array(hash))
+.map(b=>b.toString(16).padStart(2,'0'))
+.join('')
+.substring(0,12);
+}
+
+/* CHECK KEY */
+async function checkKey(){
+
+let key=document.getElementById("keyInput").value.trim();
+let device=getDeviceID();
+
+let parts=key.split("-");
+
+if(parts.length<5){
+document.getElementById("notice").innerHTML="<span style='color:red'>❌ Sai format</span>";
+return;
+}
+
+let keyDevice=parts[2];
+let expire=parts[3];
+let sign=parts[4];
+
+if(keyDevice!==device){
+document.getElementById("notice").innerHTML="<span style='color:red'>❌ Không đúng thiết bị</span>";
+return;
+}
+
+let base=device+"|"+expire+"|"+SECRET;
+let correctSign=await sha256(base);
+
+if(sign!==correctSign){
+document.getElementById("notice").innerHTML="<span style='color:red'>❌ Key sai chữ ký</span>";
+return;
+}
+
+/* CHECK HẾT HẠN */
+let year=expire.substring(0,4);
+let month=expire.substring(4,6)-1;
+let day=expire.substring(6,8);
+let hour=expire.substring(8,10);
+let minute=expire.substring(10,12);
+
+let expireDate=new Date(year,month,day,hour,minute);
+
+if(new Date()>expireDate){
+document.getElementById("notice").innerHTML="<span style='color:red'>⏰ Key đã hết hạn</span>";
+return;
+}
+
+document.getElementById("notice").innerHTML="<span style='color:green'>✅ Đăng nhập thành công</span>";
+
+setTimeout(()=>{
+document.getElementById("loginBox").style.display="none";
+document.getElementById("mainApp").style.display="block";
+},800);
+}
+
+/* LINKS */
+function openFB(){
+window.location.href="https://www.facebook.com/share/1Fszxhwcz2/?mibextid=wwXIfr";
+}
+
+function openZalo(){
+window.location.href="https://zalo.me/0328507282";
+}
+
+</script>
+
+</body>
+</html>
